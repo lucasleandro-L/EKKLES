@@ -8,6 +8,7 @@ import com.ekkles.api.model.Perfil;
 import com.ekkles.api.model.Usuario;
 import com.ekkles.api.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,16 +18,17 @@ import java.util.List;
 public class UsuarioService {
 
     private final UsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
     public UsuarioResponse criar(UsuarioRequest req) {
-
+        // RN-01: e-mail único
         if (repository.existsByEmailIgnoreCase(req.email())) {
             throw new ConflitoException("Já existe um usuário cadastrado com esse e-mail.");
         }
         Usuario usuario = new Usuario();
         usuario.setNome(req.nome());
         usuario.setEmail(req.email());
-        usuario.setSenha(req.senha());
+        usuario.setSenha(passwordEncoder.encode(req.senha())); // senha salva com hash BCrypt
         usuario.setPerfil(req.perfil() != null ? req.perfil() : Perfil.MEMBRO);
         return UsuarioResponse.from(repository.save(usuario));
     }
@@ -48,7 +50,7 @@ public class UsuarioService {
         });
         usuario.setNome(req.nome());
         usuario.setEmail(req.email());
-        usuario.setSenha(req.senha());
+        usuario.setSenha(passwordEncoder.encode(req.senha()));
         if (req.perfil() != null) {
             usuario.setPerfil(req.perfil());
         }

@@ -36,6 +36,13 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ErroResponse> tratarCredenciais(CredenciaisInvalidasException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                ErroResponse.semCampos(401, "Não autenticado", ex.getMessage(), req.getRequestURI())
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponse> tratarValidacao(MethodArgumentNotValidException ex, HttpServletRequest req) {
         List<CampoErro> campos = ex.getBindingResult().getFieldErrors().stream()
